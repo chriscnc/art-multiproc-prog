@@ -5,12 +5,7 @@
 
 (def p-count 5)
 
-(def forks [(atom false)
-            (atom false)
-            (atom false)
-            (atom false)
-            (atom false)])
-
+(def forks (into [] (repeat p-count (ref false))))
 
 ;phil -> r l forks
 ;   0 -> 0 1 
@@ -56,7 +51,6 @@
              (reset! right-fork false)
              (log/info (map deref forks))
              (recur)))))
-
 
 
 (defn -main
