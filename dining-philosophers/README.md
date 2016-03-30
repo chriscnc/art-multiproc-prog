@@ -1,36 +1,23 @@
 # dining-philosophers
 
-FIXME: description
+Simulation of the dining philosphers problem using Clojure's software transactional memory.
 
-## Installation
+## Running
 
-Download from http://example.com/FIXME.
+```bash
+$ lein trampoline run
+```
 
-## Usage
+The simulation will run with 10 philosophers and until each one has eaten for 20 seconds.
 
-FIXME: explanation
+These parameters can be changed by editing `core.clj`
 
-    $ java -jar dining-philosophers-0.1.0-standalone.jar [args]
+```clojure
+(def p-count 10)
+(def max-eating-time 20)
+```
 
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2016 FIXME
+Copyright © 2016 Chris Cornelison
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.

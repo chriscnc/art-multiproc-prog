@@ -3,40 +3,33 @@
   (:import [java.util.concurrent Executors])
   (:gen-class))
 
-(def p-count 5)
-(def max-eating-time 3)
-(def max-thinking-time 3)
+(def p-count 10)
+(def max-eating-time 20)
 
-; forks are either :avail or :in-use
-; the more obvious...
-; (def forks (into [] (repeat p-count (ref :avail))))
-; doesn't create unique references for some reason
-(def forks (for [_ (range p-count)] (ref :avail)))
-(def eating-time (for [_ (range p-count)] (atom 0)))
-(def thinking-time (for [_ (range p-count)] (atom 0)))
+(def forks (into [] (take p-count (repeatedly #(ref :avail)))))
+(def eating-time (into [] (take p-count (repeatedly #(atom 0)))))
+(def thinking-time (into [] (take p-count (repeatedly #(atom 0)))))
 
-;phil -> r l forks
-;   0 -> 0 1 
-;   1 -> 1 2
-;   2 -> 2 3
-;   3 -> 3 4
-;   4 -> 4 0
 
 (defn think
+  "Think for 1 to 3 seconds"
   [pid]
-  (let [secs (inc (rand-int max-thinking-time))]
+  (let [secs (inc (rand-int 3))]
     (swap! (nth thinking-time pid) #(+ % secs))
-    (Thread/sleep (* 100 secs))))
+    (Thread/sleep (* 1000 secs))))
 
 
 (defn eat
+  "Eat for a 1 to 3 seconds"
   [pid]
-  (let [secs (inc (rand-int max-eating-time))]
+  (let [secs (inc (rand-int 3))]
     (swap! (nth eating-time pid) #(+ % secs))
-    (Thread/sleep (* 100 secs))))
+    (Thread/sleep (* 1000 secs))))
 
 
 (defn pickup-forks!
+  "In a transaction, see if both forks are available and if so,
+  pick them up. Returns true if successfull, false otherwise."
   [left-fork right-fork]
   (dosync 
     (if (and (= :avail @left-fork)
@@ -48,14 +41,16 @@
 
 
 (defn putdown-forks!
+  "Just like the function name says..."
   [left-fork right-fork]
   (dosync (ref-set left-fork :avail)
           (ref-set right-fork :avail)))
 
 
 (defn make-philosopher
+  "Constructs a philospher function."
   [pid]
-  (log/info "Philospher:" pid "enters.")
+  (log/info "Philospher:" pid "sits...")
   (fn [] 
     (let [left-fork (nth forks pid)
           right-fork (nth forks (mod (inc pid) p-count))]
@@ -65,29 +60,38 @@
           (when able-to-eat?
             (eat pid)
             (putdown-forks! left-fork right-fork)))
-        (recur)))))
+
+        (if (< @(nth eating-time pid) max-eating-time)
+          (recur)
+          :full)))))
 
 
-(defn monitor-philosophers []
-  (loop [times-left 10]
-    (when (> times-left 0)
-      (log/info (str "  Eating times: " (into [] (map deref eating-time))))
-      (log/info (str "Thinking times: " (into [] (map deref thinking-time))))
-      (Thread/sleep 1000)
-      (recur (dec times-left)))))
+(defn wait-tables []
+  "Monitors the philosphers while they are eating"
+  (loop []
+    (log/info (str "Time eating:   " (into [] (map deref eating-time))))
+    (Thread/sleep 2000)
+    (recur)))
 
 
-;; replace the monitor with some kind of eating count down for each philosopher
-;; where the philosopher gets up and leaves when they have eaten enough
 (defn -main
   [& args]
   (log/info "Setting the table...")
-  (let [tasks (map make-philosopher (range p-count))]
-    (log/info "Seating the philosophers...")
-    (dorun (map (fn [f] (future (f))) tasks))
-    (log/info "Starting monitor...")
-    @(future (monitor-philosophers))
-    (log/info "Pulling the table-cloth...")
+  (log/info "Seating the philosophers...")
+  (let [philosophers (into [] (map make-philosopher (range p-count)))
+        waiter (future-call wait-tables)
+        _ (log/info "Commence thinking and eating...")
+        eating-philosophers (into [] (map #(future-call %) philosophers))]
+
+    ; wait for all the philosphers to get full
+    (dorun (map #(deref %) eating-philosophers))
+
+    (doseq [pid (range p-count)]
+      (log/infof "Philospher %d - ate for: %d secs, and thought for: %d secs" 
+                 pid @(nth eating-time pid) @(nth thinking-time pid)))
+
+    (future-cancel waiter)
+    (log/info "Busing the table...")
     (shutdown-agents)))
   
 
