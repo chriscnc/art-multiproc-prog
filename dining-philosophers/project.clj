@@ -7,5 +7,6 @@
                  [org.clojure/tools.logging "0.3.1"]
                  [ch.qos.logback/logback-classic "1.0.13"]]
   :main ^:skip-aot dining-philosophers.core
-  :target-path "target/%s"
+  :java-source-paths ["java-src"]
+  :target-path "target"
   :profiles {:uberjar {:aot :all}})
