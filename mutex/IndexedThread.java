@@ -15,7 +15,7 @@ class IndexedThread extends Thread {
         runnable.run();
     }
 
-    int get() {
+    int getIndex() {
         return index;
     }
 }
