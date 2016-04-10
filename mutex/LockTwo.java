@@ -1,6 +1,6 @@
 
 class LockTwo implements Lock {
-    private int victim;
+    private volatile int victim;
 
     public int getIndex() {
         return ((IndexedThread)Thread.currentThread()).getIndex();

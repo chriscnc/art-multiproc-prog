@@ -1,6 +1,6 @@
 
 class LockOne implements Lock {
-    private boolean[] flag = new boolean[2];
+    private volatile boolean[] flag = new boolean[2];
 
     public int getIndex() {
         return ((IndexedThread)Thread.currentThread()).getIndex();
