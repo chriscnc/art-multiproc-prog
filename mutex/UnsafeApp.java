@@ -1,26 +1,13 @@
 
-class LockTwoCounter {
-    private long value = 0;
-    Lock lock = new LockTwo();
-
-    public long getAndIncrement() {
-        lock.acquire();
-        try {
-            long temp = value;
-            value = temp + 1;
-            return temp;
-        } finally {
-            lock.release();
-        }
-    }
-
+class UnsafeApp {
     public static void main(String[] args) throws InterruptedException {
+        final int iters = 1000000;
         IndexedThread[] threads = new IndexedThread[2];
-        LockTwoCounter c = new LockTwoCounter();
+        UnsafeCounter c = new UnsafeCounter();
         for(int i = 0; i < threads.length; i++) {
             threads[i] = new IndexedThread(i, new Runnable() {
                 public void run() {
-                    for(int i = 0; i <= 1000000; i++) {
+                    for(int i = 0; i < iters; i++) {
                         c.getAndIncrement();
                     }
                 }
@@ -32,12 +19,11 @@ class LockTwoCounter {
             threads[i].start();
         }
         
-        System.out.println("When thread executions are interleaved, this will dead-lock.");
-
         for(int i = 0; i < threads.length; i++) {
-            threads[i].join();
+            threads[i].join(2500);
         }
 
-        System.out.println(String.format("counter should be: 2000000, actual: %d", c.getAndIncrement()));
+        System.out.println(String.format("counter should be: %d", iters * threads.length));
+        System.out.println(c);
     }
 }

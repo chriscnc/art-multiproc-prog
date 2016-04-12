@@ -7,7 +7,7 @@ class LockOne implements Lock {
     }
 
     public void acquire() {
-        int i = getIndex();
+        int i = getIndex(); 
         int j = 1 - i;
         flag[i] = true;
         while(flag[j]) {} // wait
