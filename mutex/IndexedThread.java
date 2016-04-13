@@ -4,15 +4,10 @@
  */
 class IndexedThread extends Thread {
     int index;
-    Runnable runnable;
 
-    public IndexedThread(int index, Runnable runnable) {
+    public IndexedThread(int index, Runnable target) {
+        super(target);
         this.index = index;
-        this.runnable = runnable;
-    }
-
-    public void run() {
-        runnable.run();
     }
 
     int getIndex() {
