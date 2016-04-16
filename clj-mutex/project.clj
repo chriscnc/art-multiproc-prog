@@ -4,6 +4,6 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]]
-  :main ^:skip-aot clj-mutex.core
+  :main ^:skip-aot clj-mutex.unsafe-core
   :target-path "target"
   :profiles {:uberjar {:aot :all}})

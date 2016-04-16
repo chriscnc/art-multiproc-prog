@@ -22,7 +22,7 @@
       (acquire [] (let [i (get-thread-index)
                         j (- 1 i)]
                     (aset @flag i true)
-                    (while (aget flag j)
+                    (while (aget @flag j)
                       ;; wait
                       )))
       (release [] (let [i (get-thread-index)]
@@ -43,6 +43,7 @@
       (release [] ))))
 
 
+;; this dead locks for some reason, and it shouldn't
 (defn make-peterson-lock
   "Create a peterson lock instance that implements the 
   Lock interface."
@@ -54,7 +55,8 @@
                         j (- 1 i)]
                     (aset @flag i true) ; I'm interested
                     (vreset! victim i) ; you go first
-                    (while (and (aget @flag j) (= victim i))
+                    (while (and (aget @flag j) (= @victim i))
+                      (println (format "flag[j]=%s, victim=%d" (aget @flag j) @victim))
                       ;; wait
                       )))
       (release [] (let [i (get-thread-index)]
