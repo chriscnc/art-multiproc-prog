@@ -2,10 +2,10 @@
 class LockOneApp {
     public static void main(String[] args) throws InterruptedException {
         final int iters = 1000000;
-        IndexedThread[] threads = new IndexedThread[2];
+        Thread[] threads = new Thread[2];
         SafeCounter c = new SafeCounter(new LockOne());
         for(int i = 0; i < threads.length; i++) {
-            threads[i] = new IndexedThread(i, new Runnable() {
+            threads[i] = new Thread(new Runnable() {
                 public void run() {
                     for(int i = 0; i < iters; i++) {
                         c.getAndIncrement();
@@ -15,7 +15,7 @@ class LockOneApp {
         }
 
         for(int i = 0; i < threads.length; i++) {
-            System.out.println(String.format("Starting thread: %d", threads[i].getIndex()));
+//            System.out.println(String.format("Starting thread: %d", threads[i].getIndex()));
             threads[i].start();
         }
         

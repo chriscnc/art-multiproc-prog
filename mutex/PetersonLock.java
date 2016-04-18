@@ -3,12 +3,8 @@ class PetersonLock implements Lock {
     private volatile boolean[] flag = new boolean[2];
     private volatile int victim;
 
-    public int getIndex() {
-        return ((IndexedThread)Thread.currentThread()).getIndex();
-    }
-
     public void acquire() {
-        int i = getIndex();
+        int i = ThreadID.get();
         int j = 1 - i;
         flag[i] = true; // I'm interested
         victim = i;     // you go first
@@ -16,7 +12,7 @@ class PetersonLock implements Lock {
     }
 
     public void release() {
-        int i = getIndex();
+        int i = ThreadID.get();
         flag[i] = false;
     }
 }
